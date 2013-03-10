@@ -1,1 +1,1 @@
-rvm use 1.9.3@tango_id3 --create
+rvm use 1.9.3@tango_metadata --create
