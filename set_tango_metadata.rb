@@ -12,11 +12,10 @@ Dir.foreach(@main_folder) do |folder|
     parsed_file = file.match(/\A(\d{4})\s((.+)\s\((.+)\)|.+)\.(\S{3})\z/)
     @orchestra = folder
     @year = parsed_file[1]
-    @singer = parsed_file[4]
-    @name = parsed_file[(@singer ? 3 : 2)]
-    @performance = TangoInfo::Performance.new orchestra: @orchestra, name: @name, singer: @singer, year: @year
+    @vocalist = parsed_file[4]
+    @name = parsed_file[(@vocalist ? 3 : 2)]
+    @performance = TangoInfo::Performance.new orchestra: @orchestra, name: @name, vocalist: @vocalist, year: @year
     @performance.get_info!
-    break
   end
 end
 
