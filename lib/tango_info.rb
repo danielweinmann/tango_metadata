@@ -28,6 +28,14 @@ module TangoInfo
     
     private
     
+    def cleanup_string(string)
+      UnicodeUtils.casefold(UnicodeUtils.nfkd(string))
+    end
+    
+    def compare_strings(first, second)
+      cleanup_string(first) == cleanup_string(second)
+    end
+    
     def get_tint
 
       page = Nokogiri::HTML(HTTParty.get("#{ROOT_URL}/?q=#{URI.encode(self.name)}").body)
@@ -43,7 +51,7 @@ module TangoInfo
       @works_header.next_element.search("tbody").search("tr").each do |row|
         name = row.search("td")[0].text
         alternative_name = row.search("td")[1].text
-        if UnicodeUtils.casefold(UnicodeUtils.nfkd(name)) == UnicodeUtils.casefold(UnicodeUtils.nfkd(self.name)) or UnicodeUtils.casefold(UnicodeUtils.nfkd(alternative_name)) == UnicodeUtils.casefold(UnicodeUtils.nfkd(self.name))
+        if compare_strings(name, self.name) or compare_strings(alternative_name, self.name)
           row.search('a').each do |link|
             if link.text == "info"
               @links << "#{ROOT_URL}#{link['href']}"
@@ -51,6 +59,8 @@ module TangoInfo
           end
         end
       end
+      
+      puts @links.inspect
       
       @links.each do |link|
 
@@ -67,7 +77,7 @@ module TangoInfo
           orchestra = row.search("td")[2].text
           vocalist = row.search("td")[3].text
           year = row.search("td")[4].text[0..3]
-          if UnicodeUtils.casefold(UnicodeUtils.nfkd(orchestra)) == UnicodeUtils.casefold(UnicodeUtils.nfkd(self.orchestra)) and UnicodeUtils.casefold(UnicodeUtils.nfkd(vocalist)) == UnicodeUtils.casefold(UnicodeUtils.nfkd(self.vocalist)) and UnicodeUtils.casefold(UnicodeUtils.nfkd(year)) == UnicodeUtils.casefold(UnicodeUtils.nfkd(self.year))
+          if compare_strings(orchestra, self.orchestra) and compare_strings(vocalist, self.vocalist) and compare_strings(year, self.year)
             row.search('a').each do |tint_link|
               if tint_link.text == "info"
                 return tint_link['href'][1..-1]

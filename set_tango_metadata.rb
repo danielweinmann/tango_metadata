@@ -8,6 +8,8 @@ raise "Main folder not found" unless File.directory?(@main_folder)
 Dir.foreach(@main_folder) do |folder|
   next if folder == '.' or folder == '..' or folder == '.DS_Store'
   Dir.foreach("#{@main_folder}/#{folder}") do |file|
+    # TODO: remove this
+    next unless file.match /esquina/
     next if file == '.' or file == '..' or file == '.DS_Store'
     parsed_file = file.match(/\A(\d{4})\s((.+)\s\((.+)\)|.+)\.(\S{3})\z/)
     @orchestra = folder

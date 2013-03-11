@@ -1,7 +1,7 @@
 tango_metadata
 ==============
 
-Tool for looking up metadata for tangos from https://tango.info/
+Tool for looking up metadata for tangos from https://tango.info/ and http://www.tango-dj.at/database/
 
 File organization
 -----------------
