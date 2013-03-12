@@ -1,9 +1,15 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    activesupport (3.2.12)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
+    brstring (3.3.0)
+      activesupport (>= 3.0.0)
     httparty (0.10.2)
       multi_json (~> 1.0)
       multi_xml (>= 0.5.2)
+    i18n (0.6.4)
     multi_json (1.6.1)
     multi_xml (0.5.3)
     nokogiri (1.5.6)
@@ -13,6 +19,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  brstring
   httparty
   nokogiri
   unicode_utils
