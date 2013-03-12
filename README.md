@@ -12,7 +12,7 @@ Put your tango files in a main folder with just them, and inside of that separat
 
 2. Inside the orchestra's folder, name your files with the format as in the following examples: "1942 Ribereña (Juan Carlos Miranda).m4a", if it has a singer (in this case, Juan Carlos Miranda); or "1938 La esquina.m4a" if it's an instrumental track. The m4a extension is just and example: any common audio format will work.
 
-An example "tango" folder and 3 files are provided for guidance.
+An example "tango" folder and a few files are provided for guidance.
 
 Configuration
 -----------------
