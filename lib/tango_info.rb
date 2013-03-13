@@ -11,7 +11,7 @@ module TangoInfo
     
     ROOT_URL = "https://tango.info"
     
-    attr_accessor :orchestra, :title, :vocalist, :year, :tint, :genre, :composer, :lyricist
+    attr_accessor :orchestra, :title, :alternate_title, :vocalist, :year, :tint, :genre, :composer, :lyricist, :not_found
 
     def initialize(options = {})
       @tint = options[:tint]
@@ -23,6 +23,7 @@ module TangoInfo
       @date = options[:date]
       @composer = UnicodeUtils.nfkc(options[:composer]) if options[:composer]
       @lyricist = UnicodeUtils.nfkc(options[:lyricist]) if options[:lyricist]
+      @not_found = false
     end
     
     def instrumental
@@ -43,18 +44,35 @@ module TangoInfo
 
     def composers
       composers = []
-      composers << "Composer: #{self.composer}" if self.composer
-      composers << "Lyricist: #{self.lyricist}" if self.lyricist
+      composers << "Composer: #{self.composer}" if self.composer and not self.composer.empty?
+      composers << "Lyricist: #{self.lyricist}" if self.lyricist and not self.lyricist.empty?
       composers.join("; ")
     end
     
+    def titles
+      "#{self.title}#{" | #{self.alternate_title}" if self.alternate_title}"
+    end
+    
+    def comment
+      if self.not_found
+        "*** Info not found. Please review file ***"
+      else
+        self.composers
+      end
+    end
+    
+    def url
+      "#{ROOT_URL}/#{self.tint}" if self.tint
+    end
+    
     def get_info!
+      puts "#{self.orchestra} - #{self.year} #{self.title} (#{self.album})"      
       get_tint_and_composers! unless self.tint
       if self.tint
-        print "TINT #{self.tint} found. Retrieving info..."
+        print "  TINT #{self.tint} found. Retrieving info..."
         get_info_from_tango_info!
       else
-        print "TINT not found. Searching Tango-DJ.at..."
+        print "  TINT not found. Searching Tango-DJ.at..."
         get_info_from_tango_dj_at!
       end
     end
@@ -62,6 +80,7 @@ module TangoInfo
     private
     
     def cleanup_string(string)
+      return unless string
       UnicodeUtils.casefold(UnicodeUtils.nfkc(string)).remover_acentos
     end
     
@@ -90,7 +109,7 @@ module TangoInfo
         if compare_strings(title, self.title) or compare_strings(alternative_title, self.title)
           row.search('a').each do |link|
             if link.text == "info"
-              works_data << { url: "#{ROOT_URL}#{link['href']}", composer: composer, lyricist: lyricist }
+              works_data << { url: "#{ROOT_URL}#{link['href']}", title: title, alternate_title: alternate_title, composer: composer, lyricist: lyricist }
             end
           end
         end
@@ -110,11 +129,14 @@ module TangoInfo
         performances_header.next_sibling.search("tbody").search("tr").each do |row|
           orchestra = row.search("td")[2].text
           vocalist = row.search("td")[3].text
+          vocalist = nil if vocalist == "-"
           year = row.search("td")[4].text[0..3]
           if compare_strings(orchestra, self.orchestra) and compare_strings(vocalist, self.vocalist) and compare_strings(year, self.year)
             row.search('a').each do |tint_link|
               if tint_link.text == "info"
                 self.tint = tint_link['href'][1..-1]
+                self.title = work_data[:title]
+                self.alternate_title = work_data[:alternate_title]
                 self.composer = work_data[:composer]
                 self.lyricist = work_data[:lyricist]
                 return
@@ -130,8 +152,7 @@ module TangoInfo
     end
     
     def get_info_from_tango_info!
-      page = Nokogiri::HTML(HTTParty.get("#{ROOT_URL}/#{self.tint}").body)
-      self.title = page.search(".content_inner h1")[0].text[7..-1]
+      page = Nokogiri::HTML(HTTParty.get(self.url).body)
       page.search(".infobox td").each do |column|
         if column.text == "Genre:"
           self.genre = UnicodeUtils.titlecase(column.next_element.text)
@@ -144,21 +165,25 @@ module TangoInfo
     end
     
     def get_info_from_tango_dj_at!
-      page = Nokogiri::HTML(HTTParty.get("http://www.tango-dj.at/database/?tango-db-search=#{URI.encode(cleanup_string(self.title))}&search=Search").body)
-      page.search("#searchresult tbody tr").each do |row|
-        title = row.search("td")[1].text
-        orchestra = row.search("td")[2].text
-        year = row.search("td")[3].text
-        genre = UnicodeUtils.titlecase(row.search("td")[4].text)
-        full_orchestra = "Orquesta #{self.orchestra}"
-        full_orchestra = "#{full_orchestra} con #{self.vocalist}" if self.vocalist
-        if compare_strings(title, self.title) and compare_strings(orchestra, full_orchestra) and compare_strings(year, self.year)
-          self.genre = genre
-          puts "found it! :D"
-          return
+      [self.title, self.alternate_title].each do |search|
+        next unless search
+        page = Nokogiri::HTML(HTTParty.get("http://www.tango-dj.at/database/?tango-db-search=#{URI.encode(cleanup_string(search))}&search=Search").body)
+        page.search("#searchresult tbody tr").each do |row|
+          title = row.search("td")[1].text
+          orchestra = row.search("td")[2].text
+          year = row.search("td")[3].text
+          genre = UnicodeUtils.titlecase(row.search("td")[4].text)
+          full_orchestra = "Orquesta #{self.orchestra}"
+          full_orchestra = "#{full_orchestra} con #{self.vocalist}" if self.vocalist
+          if compare_strings(title, search) and compare_strings(orchestra, full_orchestra) and compare_strings(year, self.year)
+            self.genre = genre
+            puts "found it! :D"
+            return
+          end
         end
       end
       
+      self.not_found = true
       puts "nope :("
 
     end

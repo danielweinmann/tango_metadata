@@ -13,6 +13,7 @@ GEM
     multi_json (1.6.1)
     multi_xml (0.5.3)
     nokogiri (1.5.6)
+    ruby-mp3info (0.8)
     unicode_utils (1.4.0)
 
 PLATFORMS
@@ -22,4 +23,5 @@ DEPENDENCIES
   brstring
   httparty
   nokogiri
+  ruby-mp3info
   unicode_utils
