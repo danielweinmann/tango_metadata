@@ -11,7 +11,7 @@ module TangoInfo
     
     ROOT_URL = "https://tango.info"
     
-    attr_accessor :orchestra, :title, :alternate_title, :vocalist, :year, :tint, :genre, :composer, :lyricist, :not_found
+    attr_accessor :orchestra, :title, :alternative_title, :vocalist, :year, :tint, :genre, :composer, :lyricist, :not_found
 
     def initialize(options = {})
       @tint = options[:tint]
@@ -50,7 +50,7 @@ module TangoInfo
     end
     
     def titles
-      "#{self.title}#{" | #{self.alternate_title}" if self.alternate_title}"
+      "#{self.title}#{" | #{self.alternative_title}" if self.alternative_title and not self.alternative_title.empty?}"
     end
     
     def comment
@@ -67,7 +67,7 @@ module TangoInfo
     
     def get_info!
       puts "#{self.orchestra} - #{self.year} #{self.title} (#{self.album})"      
-      get_tint_and_composers! unless self.tint
+      get_tint_and_initial_info!
       if self.tint
         print "  TINT #{self.tint} found. Retrieving info..."
         get_info_from_tango_info!
@@ -88,7 +88,7 @@ module TangoInfo
       cleanup_string(first) == cleanup_string(second)
     end
     
-    def get_tint_and_composers!
+    def get_tint_and_initial_info!
 
       page = Nokogiri::HTML(HTTParty.get("#{ROOT_URL}/?q=#{URI.encode(cleanup_string(self.title))}").body)
       works_header = nil
@@ -106,10 +106,12 @@ module TangoInfo
         alternative_title = row.search("td")[1].text
         composer = row.search("td")[3].text
         lyricist = row.search("td")[4].text
+        composer = nil if composer == "-"
+        lyricist = nil if lyricist == "-"
         if compare_strings(title, self.title) or compare_strings(alternative_title, self.title)
           row.search('a').each do |link|
             if link.text == "info"
-              works_data << { url: "#{ROOT_URL}#{link['href']}", title: title, alternate_title: alternate_title, composer: composer, lyricist: lyricist }
+              works_data << { url: "#{ROOT_URL}#{link['href']}", title: title, alternative_title: alternative_title, composer: composer, lyricist: lyricist }
             end
           end
         end
@@ -136,7 +138,7 @@ module TangoInfo
               if tint_link.text == "info"
                 self.tint = tint_link['href'][1..-1]
                 self.title = work_data[:title]
-                self.alternate_title = work_data[:alternate_title]
+                self.alternative_title = work_data[:alternative_title]
                 self.composer = work_data[:composer]
                 self.lyricist = work_data[:lyricist]
                 return
@@ -165,7 +167,7 @@ module TangoInfo
     end
     
     def get_info_from_tango_dj_at!
-      [self.title, self.alternate_title].each do |search|
+      [self.title, self.alternative_title].each do |search|
         next unless search
         page = Nokogiri::HTML(HTTParty.get("http://www.tango-dj.at/database/?tango-db-search=#{URI.encode(cleanup_string(search))}&search=Search").body)
         page.search("#searchresult tbody tr").each do |row|
