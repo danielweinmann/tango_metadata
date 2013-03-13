@@ -11,18 +11,18 @@ module TangoInfo
     
     ROOT_URL = "https://tango.info"
     
-    attr_accessor :orchestra, :title, :vocalist, :year, :tint, :genre, :date, :composer, :lyricist
+    attr_accessor :orchestra, :title, :vocalist, :year, :tint, :genre, :composer, :lyricist
 
     def initialize(options = {})
       @tint = options[:tint]
-      @orchestra = options[:orchestra]
-      @title = options[:title]
-      @vocalist = options[:vocalist]
+      @orchestra = UnicodeUtils.nfkc(options[:orchestra]) if options[:orchestra]
+      @title = UnicodeUtils.nfkc(options[:title]) if options[:title]
+      @vocalist = UnicodeUtils.nfkc(options[:vocalist]) if options[:vocalist]
       @year = options[:year]
-      @genre = options[:genre]
+      @genre = UnicodeUtils.nfkc(options[:genre]) if options[:genre]
       @date = options[:date]
-      @composer = options[:composer]
-      @lyricist = options[:lyricist]
+      @composer = UnicodeUtils.nfkc(options[:composer]) if options[:composer]
+      @lyricist = UnicodeUtils.nfkc(options[:lyricist]) if options[:lyricist]
     end
     
     def instrumental
@@ -33,10 +33,25 @@ module TangoInfo
       (self.instrumental ? "Instrumental" : self.vocalist)
     end
     
+    def date=(value)
+      @date = value
+    end
+    
+    def date
+      @date or "#{self.year}-01-01"
+    end
+
+    def composers
+      composers = []
+      composers << "Composer: #{self.composer}" if self.composer
+      composers << "Lyricist: #{self.lyricist}" if self.lyricist
+      composers.join("; ")
+    end
+    
     def get_info!
       get_tint_and_composers! unless self.tint
       if self.tint
-        print "TINT #{self.tint} found. Retrieving data..."
+        print "TINT #{self.tint} found. Retrieving info..."
         get_info_from_tango_info!
       else
         print "TINT not found. Searching Tango-DJ.at..."

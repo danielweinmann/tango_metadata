@@ -17,9 +17,7 @@ An example "tango" folder and a few files are provided for guidance.
 Configuration
 -----------------
 
-Before you install the gem, make sure to have [FFmpeg](http://www.ffmpeg.org/) installed.
-
-Then, in a shell window, inside the tango_metadata folder, run:
+In a shell window, inside the tango_metadata folder, run:
 
 ```
 gem install bundler
