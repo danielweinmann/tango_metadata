@@ -81,7 +81,7 @@ module TangoInfo
     
     def cleanup_string(string)
       return unless string
-      UnicodeUtils.casefold(UnicodeUtils.nfkc(string)).remover_acentos
+      UnicodeUtils.casefold(UnicodeUtils.nfkc(string)).remover_acentos.gsub(',', ' ').gsub(/\s+/, ' ')
     end
     
     def compare_strings(first, second)
