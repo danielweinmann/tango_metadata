@@ -28,7 +28,7 @@ Dir.foreach(@main_folder) do |folder|
     @shell_file = @file.gsub("'", "\\\\'").gsub(" ", "\\ ").gsub("(", "\\\(").gsub(")", "\\\)")
     @performance = TangoInfo::Performance.new orchestra: @orchestra, title: @title, vocalist: @vocalist, year: @year
     @performance.get_info!
-    if @extention == "mp3"
+    if UnicodeUtils.casefold(@extention) == UnicodeUtils.casefold("mp3")
       Mp3Info.open("#{@path}/#{@file}") do |mp3|
         mp3.tag1.clear
         mp3.tag1.title = @performance.titles
