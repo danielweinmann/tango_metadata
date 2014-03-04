@@ -79,9 +79,11 @@ module TangoInfo
     
     private
     
-    def cleanup_string(string)
+    def cleanup_string(string, remove_non_word_characters = true)
       return unless string
-      UnicodeUtils.casefold(UnicodeUtils.nfkc(string)).remover_acentos.gsub(/\W+/, ' ').gsub(/\s+/, ' ').strip
+      clean_string = UnicodeUtils.casefold(UnicodeUtils.nfkc(string)).remover_acentos
+      clean_string.gsub!(/\W+/, ' ') if remove_non_word_characters
+      clean_string.gsub(/\s+/, ' ').strip
     end
     
     def compare_strings(first, second)
@@ -169,16 +171,18 @@ module TangoInfo
     def get_info_from_tango_dj_at!
       [self.title, self.alternative_title].each do |search|
         next unless search
-        page = Nokogiri::HTML(HTTParty.get("http://www.tango-dj.at/database/?tango-db-search=#{URI.encode(cleanup_string(search))}&search=Search").body)
+        page = Nokogiri::HTML(HTTParty.get("http://www.tango-dj.at/database/?tango-db-search=#{URI.encode(cleanup_string(search, false))}&search=Search").body)
         page.search("#searchresult tbody tr").each do |row|
-          title = row.search("td")[1].text
-          orchestra = row.search("td")[2].text
-          year = row.search("td")[3].text
-          genre = UnicodeUtils.titlecase(row.search("td")[4].text)
+          title = row.search("td")[2].text
+          orchestra = row.search("td")[3].text
+          date = row.search("td")[4].text
+          year = date[-4..-1]
+          genre = UnicodeUtils.titlecase(row.search("td")[5].text)
           full_orchestra = "Orquesta #{self.orchestra}"
           full_orchestra = "#{full_orchestra} con #{self.vocalist}" if self.vocalist
           if compare_strings(title, search) and compare_strings(orchestra, full_orchestra) and compare_strings(year, self.year)
             self.genre = genre
+            self.date = "#{date[-4..-1]}-#{date[-7..-6]}-#{date[-10..-9]}" if date.length > 4
             puts "found it! :D"
             return
           end
