@@ -16,7 +16,12 @@ Dir.foreach(@main_folder) do |folder|
     
     next if file == '.' or file == '..' or file == '.DS_Store'
     parsed_file = file.match(/\A(\d{4})\s((.+)\s\((.+)\)|.+)\.(\S{3})\z/)
-    next unless parsed_file
+    unless parsed_file
+      puts "*" * (file.length + 38)
+      puts "*** File '#{file}' in wrong naming format ***"
+      puts "*" * (file.length + 38)
+      next
+    end
     @orchestra = folder
     @year = parsed_file[1]
     @vocalist = parsed_file[4]
