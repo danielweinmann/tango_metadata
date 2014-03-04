@@ -9,7 +9,14 @@ raise "Main folder not found" unless File.directory?(@main_folder)
 
 Dir.foreach(@main_folder) do |folder|
   next if folder == '.' or folder == '..' or folder == '.DS_Store'
+
+  @files = []
   Dir.foreach("#{@main_folder}/#{folder}") do |file|
+    next if file == '.' or file == '..' or file == '.DS_Store'
+    @files << file
+  end
+
+  @files.each do |file|
     
     # Comment the following line: useful only for DEBUG
     # next unless file.match /Se fue/
@@ -20,6 +27,7 @@ Dir.foreach(@main_folder) do |folder|
       puts "*" * (file.length + 38)
       puts "*** File '#{file}' in wrong naming format ***"
       puts "*" * (file.length + 38)
+      File.rename("#{@path}/#{file}", "#{@path}/[Review] #{file}")
       next
     end
     @orchestra = folder
@@ -60,6 +68,9 @@ Dir.foreach(@main_folder) do |folder|
         File.delete("#{@path}/#{@file}")
         File.rename("#{@path}/temp_#{@file}", "#{@path}/#{@file}")
       end
+    end
+    if @performance.not_found
+      File.rename("#{@path}/#{@file}", "#{@path}/[Review] #{@file}")
     end
   end
 end
