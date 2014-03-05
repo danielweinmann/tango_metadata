@@ -179,7 +179,7 @@ module TangoInfo
           year = date[-4..-1]
           genre = UnicodeUtils.titlecase(row.search("td")[5].text)
           full_orchestra = "Orquesta #{self.orchestra}"
-          full_orchestra = "#{full_orchestra} con #{self.vocalist}" if self.vocalist
+          full_orchestra = "#{full_orchestra} con #{self.vocalist.gsub(', ', ' y ')}" if self.vocalist
           if compare_strings(title, search) and compare_strings(orchestra, full_orchestra) and compare_strings(year, self.year)
             self.genre = genre
             self.date = "#{date[-4..-1]}-#{date[-7..-6]}-#{date[-10..-9]}" if date.length > 4
