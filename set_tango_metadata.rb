@@ -27,7 +27,7 @@ Dir.foreach(@main_folder) do |folder|
       puts "*" * (file.length + 38)
       puts "*** File '#{file}' in wrong naming format ***"
       puts "*" * (file.length + 38)
-      File.rename("#{@path}/#{file}", "#{@path}/[Review] #{file}")
+      File.rename("#{@path}/#{file}", "#{@path}/[Review] #{file}") unless file.match(/\[Review\]/)
       next
     end
     @orchestra = folder
