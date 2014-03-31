@@ -141,6 +141,8 @@ module TangoInfo
                 self.tint = tint_link['href'][1..-1]
                 self.title = work_data[:title]
                 self.alternative_title = work_data[:alternative_title]
+                self.orchestra = orchestra
+                self.vocalist = vocalist
                 self.composer = work_data[:composer]
                 self.lyricist = work_data[:lyricist]
                 return
@@ -180,9 +182,18 @@ module TangoInfo
           genre = UnicodeUtils.titlecase(row.search("td")[5].text)
           full_orchestra = "Orquesta #{self.orchestra}"
           full_orchestra = "#{full_orchestra} con #{self.vocalist.gsub(', ', ' y ')}" if self.vocalist
-          if compare_strings(title, search) and compare_strings(orchestra, full_orchestra) and compare_strings(year, self.year)
+          # Workaround to solve 'José García y sus Zorros Grises', because in Tango.info it is registered only as 'José García' and in TangoDJ.at it is registered as 'José García y su Orquesta "Los Zorros Grises"'
+          full_orchestra2 = "#{self.orchestra} y su Orquesta \"Los Zorros Grises\""
+          full_orchestra2 = "#{full_orchestra2} con #{self.vocalist.gsub(', ', ' y ')}" if self.vocalist
+          if compare_strings(title, search) and compare_strings(year, self.year) and ((compare_strings(orchestra, full_orchestra)) or (compare_strings(orchestra, full_orchestra2)))
             self.genre = genre
             self.date = "#{date[-4..-1]}-#{date[-7..-6]}-#{date[-10..-9]}" if date.length > 4
+            if self.vocalist
+              self.orchestra = orchestra.match(/\AOrquesta\s(.+)\scon/)[1] rescue orchestra.match(/(.+)\sy su Orquesta/)[1]
+              self.vocalist = orchestra.match(/\scon\s(.+)/)[1].gsub(' y ', ', ')
+            else
+              self.orchestra = orchestra.match(/\AOrquesta\s(.+)/)[1] rescue orchestra.match(/(.+)\sy su Orquesta/)[1]
+            end
             puts "found it! :D"
             return
           end
