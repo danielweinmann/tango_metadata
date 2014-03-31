@@ -51,6 +51,7 @@ Dir.foreach(@main_folder) do |folder|
         mp3.tag2.clear
         mp3.tag2.remove_pictures
         mp3.tag2.TIT2 = @performance.titles
+        mp3.tag2.TPE1 = @performance.orchestra
         mp3.tag2.TDRL = @performance.date
         mp3.tag2.TDRC = @performance.date
         mp3.tag2.TALB = @performance.album
