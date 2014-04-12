@@ -132,6 +132,8 @@ module TangoInfo
         next if performances_header.next_sibling.content.match /\AN\/A/
         performances_header.next_sibling.search("tbody").search("tr").each do |row|
           orchestra = row.search("td")[2].text
+          # Workaround to rename Alfredo J. Gobbi to Alfredo Gobbi, since Alfredo Gobbi is most commonly used
+          orchestra = "Alfredo Gobbi" if orchestra == "Alfredo J. Gobbi"
           vocalist = row.search("td")[3].text
           vocalist = nil if vocalist == "-"
           year = row.search("td")[4].text[0..3]
