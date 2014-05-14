@@ -61,7 +61,7 @@ Dir.foreach(@main_folder) do |folder|
       end
     else
       `#{File.expand_path("../", __FILE__)}/ffmpeg -y -i #{@shell_path}/#{@shell_file} -map 0:a:0 -map_metadata -1 -c:a copy #{@shell_path}/clean_#{@shell_file} > /dev/null 2>&1`
-      `#{File.expand_path("../", __FILE__)}/ffmpeg -y -i #{@shell_path}/clean_#{@shell_file} -map 0:a:0 -c:a copy -metadata title="#{@performance.titles}" -metadata artist='#{@performance.orchestra}' -metadata date='#{@performance.date}' -metadata album='#{@performance.album}' -metadata genre='#{@performance.genre}' -metadata composer='#{@performance.composers}' -metadata comment='#{@performance.comment}' #{@shell_path}/temp_#{@shell_file} > /dev/null 2>&1`
+      `#{File.expand_path("../", __FILE__)}/ffmpeg -y -i #{@shell_path}/clean_#{@shell_file} -map 0:a:0 -c:a copy -metadata title="#{@performance.titles}" -metadata artist="#{@performance.orchestra}" -metadata date="#{@performance.date}" -metadata album="#{@performance.album}" -metadata genre="#{@performance.genre}" -metadata composer="#{@performance.composers}" -metadata comment="#{@performance.comment}" #{@shell_path}/temp_#{@shell_file} > /dev/null 2>&1`
       if File.exists?("#{@path}/clean_#{@file}")
         File.delete("#{@path}/clean_#{@file}")
       end
